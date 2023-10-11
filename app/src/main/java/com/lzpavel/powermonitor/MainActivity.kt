@@ -2,9 +2,11 @@ package com.lzpavel.powermonitor
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.net.Uri
 import android.os.Build
@@ -16,11 +18,14 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.lifecycle.Observer
 
 
 class MainActivity : ComponentActivity() {
 
+    val LOG_TAG = "MainActivity"
 
+    private val viewModel: MainViewModel by viewModels { MainViewModelFactory() }
 
     private lateinit var fwService: FloatingWidgetService
     private var fwBound: Boolean = false
@@ -28,15 +33,29 @@ class MainActivity : ComponentActivity() {
     private lateinit var notificationManager: NotificationManager
 
     companion object {
-        private val none = {}
+        const val RECEIVER_ACTION = "com.lzpavel.powermonitor.MAIN_ACTIVITY_RECEIVER"
 
-        var showToastCall = none
-        var showWidget = none
-        var showWidgetSu = none
-        var hideWidget = none
-        var showNotification = none
-        var showColourPicker = none
+        var showToastCall = {}
+        var showWidget = {}
+        var showWidgetSu = {}
+        var hideWidget = {}
+        var showNotification = {}
+        var showColourPicker = {}
+        var switchFloatingWidgetState = {}
         //var showColourPicker2 = MainActivity::showColourPickerFn
+    }
+
+    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(LOG_TAG, "BroadcastReceiver: onReceive")
+            val type: String = intent?.getStringExtra("type") ?: ""
+            if (type == "update") {
+                val state: Boolean = intent?.getBooleanExtra("isShowing", false) ?: false
+                viewModel.updateFloatingWidgetShowing(state)
+                Log.d(LOG_TAG, "BroadcastReceiver: onReceive: isShowing: $state")
+            }
+        }
+
     }
 
     private val fwConnection = object : ServiceConnection {
@@ -57,11 +76,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val LOG_TAG = "TagMainActivity"
-        val vm: MainViewModel by viewModels { MainViewModelFactory() }
+
 
         Log.d(LOG_TAG, "onCreate")
         showToastCall = {
-            var str = "Hello: ${vm.cnt.value}"
+            var str = "Hello: ${viewModel.cnt.value}"
             Toast.makeText(this, str, Toast.LENGTH_SHORT).show()
         }
         showWidget = ::showWidget
@@ -69,6 +88,23 @@ class MainActivity : ComponentActivity() {
         hideWidget = ::hideWidget
         showNotification = ::showNotification
         showColourPicker = ::showColourPickerFn
+        switchFloatingWidgetState = {
+            if (!fwService.isStarted) {
+                showWidgetSu()
+            } else {
+                hideWidget()
+            }
+            //viewModel.isFloatingWidgetShowing.value = ?
+        }
+
+        /*val fwObserver = Observer<Boolean> {
+            if (it) {
+                showWidgetSu()
+            } else {
+                hideWidget()
+            }
+        }
+        viewModel.isFloatingWidgetShowing.observe(this, fwObserver)*/
 
 
 
@@ -79,12 +115,13 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
-            MainView(vm)
+            MainView(viewModel)
         }
     }
 
     override fun onStart() {
         super.onStart()
+        subscribeReceiver()
         Intent(this, FloatingWidgetService::class.java).also {intent ->
             bindService(intent, fwConnection, Context.BIND_AUTO_CREATE)
         }
@@ -93,7 +130,26 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         super.onStop()
         unbindService(fwConnection)
+        unsubscribeReceiver()
         fwBound = false
+    }
+
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    fun subscribeReceiver() {
+        //val br: BroadcastReceiver = MyBroadcastReceiver()
+
+        val filter = IntentFilter(RECEIVER_ACTION)
+        if (Build.VERSION.SDK_INT >= 33) {
+            val receiverFlags = RECEIVER_NOT_EXPORTED
+            registerReceiver(broadcastReceiver, filter, receiverFlags)
+        } else {
+            //registerReceiver(br, filter, 0)
+            registerReceiver(broadcastReceiver, filter)
+        }
+    }
+
+    fun unsubscribeReceiver() {
+        unregisterReceiver(broadcastReceiver)
     }
 
     private fun showWidget() {

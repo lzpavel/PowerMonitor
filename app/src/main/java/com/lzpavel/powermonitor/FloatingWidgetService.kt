@@ -41,6 +41,7 @@ class FloatingWidgetService : Service() {
     }
 
     var isStarted = false
+    var isShowing = false
     var cnt: Int = 0
 
     val FW_MODE_DEBUG = 0
@@ -209,6 +210,17 @@ class FloatingWidgetService : Service() {
 
             windowManager.addView(mFloatingView, layoutParams)
             mFloatingView?.visibility = View.VISIBLE
+            isShowing = true
+            sendBroadcast()
+        }
+    }
+
+    fun sendBroadcast() {
+        Intent().also { intent ->
+            intent.setAction(MainActivity.RECEIVER_ACTION)
+            intent.putExtra("type", "update")
+            intent.putExtra("isShowing", isShowing)
+            sendBroadcast(intent)
         }
     }
 
@@ -219,6 +231,8 @@ class FloatingWidgetService : Service() {
         }
         if (mFloatingView != null) {
             windowManager.removeView(mFloatingView)
+            isShowing = false
+            sendBroadcast()
             mFloatingView = null
         }
         if (isStarted) {

@@ -1,6 +1,9 @@
 package com.lzpavel.powermonitor
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,10 +15,12 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.sp
 
 
 @Preview(showBackground = true)
@@ -49,6 +55,13 @@ fun MainView(vm: MainViewModel? = null) {
                 var cnt = vm?.cnt?.observeAsState()?.value ?: 0
 
                 var openDialog by remember { mutableStateOf(false) }
+
+                var isFwShowing = vm?.isFloatingWidgetShowing?.observeAsState()?.value ?: false
+                FloatingWidgetBlock(isFwShowing) {
+                    MainActivity.switchFloatingWidgetState()
+
+                }
+                Divider()
 
                 Button(onClick = { vm?.cnt?.postValue(++cnt) }) {
                     Text(text = "$cnt")
@@ -201,6 +214,28 @@ fun AlertDialogPreview() {
 
     //}
 
+}
+
+@Preview(showBackground = true)
+@Composable
+fun FloatingWidgetBlock(isChecked: Boolean = false, onClick: (() -> Unit)? = null) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Floating widget",
+            fontSize = 16.sp
+        )
+        Switch(
+            checked = isChecked,
+            onCheckedChange = null,
+            modifier = Modifier.clickable { onClick?.invoke() }
+        )
+    }
 }
 
 
