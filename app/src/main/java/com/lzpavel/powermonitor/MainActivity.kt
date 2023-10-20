@@ -19,6 +19,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
+import com.lzpavel.powermonitor.views.MainView
 
 
 class MainActivity : ComponentActivity() {
@@ -28,18 +29,18 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels { MainViewModelFactory() }
 
     private lateinit var fwService: FloatingWidgetService
-    private var fwBound: Boolean = false
+    private var isFwConnected: Boolean = false
 
     private lateinit var notificationManager: NotificationManager
 
     companion object {
         const val RECEIVER_ACTION = "com.lzpavel.powermonitor.MAIN_ACTIVITY_RECEIVER"
 
-        var showToastCall = {}
-        var showWidget = {}
-        var showWidgetSu = {}
-        var hideWidget = {}
-        var showNotification = {}
+//        var showToastCall = {}
+//        var showWidget = {}
+//        var showWidgetSu = {}
+//        var hideWidget = {}
+//        var showNotification = {}
         var showColourPicker = {}
         var switchFloatingWidgetState = {}
         //var showColourPicker2 = MainActivity::showColourPickerFn
@@ -64,11 +65,11 @@ class MainActivity : ComponentActivity() {
             // We've bound to LocalService, cast the IBinder and get LocalService instance.
             val binder = service as FloatingWidgetService.FloatingWidgetBinder
             fwService = binder.getService()
-            fwBound = true
+            isFwConnected = true
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
-            fwBound = false
+            isFwConnected = false
         }
     }
 
@@ -79,22 +80,22 @@ class MainActivity : ComponentActivity() {
 
 
         Log.d(LOG_TAG, "onCreate")
-        showToastCall = {
+        /*showToastCall = {
             var str = "Hello: ${viewModel.cnt.value}"
             Toast.makeText(this, str, Toast.LENGTH_SHORT).show()
-        }
-        showWidget = ::showWidget
-        showWidgetSu = ::showWidgetSu
-        hideWidget = ::hideWidget
-        showNotification = ::showNotification
+        }*/
+//        showWidget = ::showWidget
+//        hideWidget = ::hideWidget
+//        showNotification = ::showNotification
         showColourPicker = ::showColourPickerFn
+        //switchFloatingWidgetState = ::showWidget
         switchFloatingWidgetState = {
-            if (!fwService.isStarted) {
-                showWidgetSu()
+            if (!fwService.isShowing) {
+                showWidget()
             } else {
                 hideWidget()
             }
-            //viewModel.isFloatingWidgetShowing.value = ?
+
         }
 
         /*val fwObserver = Observer<Boolean> {
@@ -103,8 +104,12 @@ class MainActivity : ComponentActivity() {
             } else {
                 hideWidget()
             }
-        }
-        viewModel.isFloatingWidgetShowing.observe(this, fwObserver)*/
+        }*/
+        viewModel.floatingWidgetColor.observe(this, Observer {
+            if (isFwConnected) {
+                fwService.floatingWidget?.setTextColor(it)
+            }
+        })
 
 
 
@@ -131,7 +136,7 @@ class MainActivity : ComponentActivity() {
         super.onStop()
         unbindService(fwConnection)
         unsubscribeReceiver()
-        fwBound = false
+        isFwConnected = false
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
@@ -153,6 +158,25 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun showWidget() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            //val intent: Intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${packageName}"))
+            //startActivityForResult(intent, 1)
+            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
+                Uri.parse("package:${packageName}")
+            })
+        } else {
+            //fwService.showWidget()
+            if (!fwService.isStarted) {
+                startService(Intent(this, FloatingWidgetService::class.java))
+                /*Intent(this, FloatingWidgetService::class.java).apply {
+                    putExtra("mode", 0)
+                    startService(this)
+                }*/
+            }
+        }
+    }
+
+    /*private fun showWidget() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
             //val intent: Intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${packageName}"))
             //startActivityForResult(intent, 1)
@@ -188,7 +212,7 @@ class MainActivity : ComponentActivity() {
                 //FloatingWidgetService.Mode.MODE_DEBUG
             }
         }
-    }
+    }*/
 
     private fun hideWidget() {
         fwService.closeWidget()

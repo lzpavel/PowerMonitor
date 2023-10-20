@@ -28,9 +28,10 @@ class FloatingWidgetService : Service() {
     private val binder = FloatingWidgetBinder()
 
     //var LAYOUT_FLAG: Int = 0
-    var mFloatingView: View? = null
+    //var mFloatingView: View? = null
     //var textViewFw: TextView? = null
-    lateinit var textViewFw: TextView
+    //lateinit var textViewFw: TextView
+    var floatingWidget: FloatingWidget? = null
 
     var superUserSession: SuperUserSession? = null
 
@@ -64,9 +65,19 @@ class FloatingWidgetService : Service() {
         Log.d(LOG_TAG, "onStartCommand")
         isStarted = true
         startForeground(1, FloatingWidgetNotification.build(this))
+        try {
+            superUserSession = SuperUserSession()
+            fwMode = FW_MODE_SUPERUSER
+        } catch (e: Exception) {
+            fwMode = FW_MODE_DEBUG
+            e.message?.let {
+                Log.d(LOG_TAG, it)
+            }
+            e.printStackTrace()
+        }
         //val mode = intent?.getStringExtra("mode")
-        val modeRx = intent?.getIntExtra("mode", 0)
-        if (modeRx == FW_MODE_SUPERUSER) {
+        //val modeRx = intent?.getIntExtra("mode", 0)
+        /*if (modeRx == FW_MODE_SUPERUSER) {
             try {
                 superUserSession = SuperUserSession()
                 fwMode = FW_MODE_SUPERUSER
@@ -79,8 +90,12 @@ class FloatingWidgetService : Service() {
             }
         } else {
             fwMode = FW_MODE_DEBUG
-        }
-        showWidget()
+        }*/
+        //showWidget()
+        floatingWidget = FloatingWidget(this)
+        floatingWidget?.show()
+        isShowing = true
+        sendBroadcast()
         tick()
 
         return START_NOT_STICKY
@@ -115,15 +130,17 @@ class FloatingWidgetService : Service() {
                         if (fwMode == FW_MODE_SUPERUSER) {
                             val str = superUserSession?.readVoltageCurrent() ?: "null"
                             Log.d(LOG_TAG, str)
-                            textViewFw.post {
+                            /*textViewFw.post {
                                 textViewFw.text = str
-                            }
+                            }*/
+                            floatingWidget?.postTextValue(str)
                         } else {
                             Log.d(LOG_TAG, "${cnt++}")
                             //textViewFw.text = cnt.toString()
-                            textViewFw.post {
+                            /*textViewFw.post {
                                 textViewFw.text = cnt.toString()
-                            }
+                            }*/
+                            floatingWidget?.postTextValue(cnt.toString())
                         }
                         delay(1000)
                     }
@@ -133,7 +150,7 @@ class FloatingWidgetService : Service() {
 
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    /*@SuppressLint("ClickableViewAccessibility")
     fun showWidget() {
         if (mFloatingView == null) {
             //LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
@@ -213,7 +230,7 @@ class FloatingWidgetService : Service() {
             isShowing = true
             sendBroadcast()
         }
-    }
+    }*/
 
     fun sendBroadcast() {
         Intent().also { intent ->
@@ -229,12 +246,18 @@ class FloatingWidgetService : Service() {
             superUserSession?.close()
             superUserSession = null
         }
-        if (mFloatingView != null) {
+        if (floatingWidget != null) {
+            floatingWidget?.close()
+            floatingWidget = null
+            isShowing = false
+            sendBroadcast()
+        }
+        /*if (mFloatingView != null) {
             windowManager.removeView(mFloatingView)
             isShowing = false
             sendBroadcast()
             mFloatingView = null
-        }
+        }*/
         if (isStarted) {
             isStarted = false
             stopForeground(STOP_FOREGROUND_REMOVE)
