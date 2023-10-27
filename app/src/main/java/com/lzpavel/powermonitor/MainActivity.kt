@@ -20,6 +20,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import com.lzpavel.powermonitor.views.MainView
+import kotlin.system.exitProcess
 
 
 class MainActivity : ComponentActivity() {
@@ -35,15 +36,6 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val RECEIVER_ACTION = "com.lzpavel.powermonitor.MAIN_ACTIVITY_RECEIVER"
-
-//        var showToastCall = {}
-//        var showWidget = {}
-//        var showWidgetSu = {}
-//        var hideWidget = {}
-//        var showNotification = {}
-        var showColourPicker = {}
-        var switchFloatingWidgetState = {}
-        //var showColourPicker2 = MainActivity::showColourPickerFn
     }
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -76,51 +68,33 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val LOG_TAG = "TagMainActivity"
-
-
         Log.d(LOG_TAG, "onCreate")
-        /*showToastCall = {
-            var str = "Hello: ${viewModel.cnt.value}"
-            Toast.makeText(this, str, Toast.LENGTH_SHORT).show()
-        }*/
-//        showWidget = ::showWidget
-//        hideWidget = ::hideWidget
-//        showNotification = ::showNotification
-        showColourPicker = ::showColourPickerFn
-        //switchFloatingWidgetState = ::showWidget
-        switchFloatingWidgetState = {
-            if (!fwService.isShowing) {
-                showWidget()
-            } else {
-                hideWidget()
-            }
 
-        }
-
-        /*val fwObserver = Observer<Boolean> {
-            if (it) {
-                showWidgetSu()
-            } else {
-                hideWidget()
-            }
-        }*/
-        viewModel.floatingWidgetColor.observe(this, Observer {
+        viewModel.floatingWidgetStyleLive.observe(this, Observer {
             if (isFwConnected) {
-                fwService.floatingWidget?.setTextColor(it)
+                fwService.floatingWidget?.updateTextStyle()
             }
         })
-
-
 
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         FloatingWidgetNotification.createNotificationChannel(notificationManager)
 
-
-
         setContent {
-            MainView(viewModel)
+            MainView(
+                viewModel,
+                onButtonExit = {
+                    finishAffinity()
+                    exitProcess(0)
+                },
+                onClickFloatingWidgetSwitcher = {
+                    if (!fwService.isShowing) {
+                        showWidget()
+                    } else {
+                        hideWidget()
+                    }
+                }
+            )
         }
     }
 
@@ -176,56 +150,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /*private fun showWidget() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
-            //val intent: Intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${packageName}"))
-            //startActivityForResult(intent, 1)
-            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
-                Uri.parse("package:${packageName}")
-            })
-        } else {
-            //fwService.showWidget()
-            if (!fwService.isStarted) {
-                //startService(Intent(this, FloatingWidgetService::class.java))
-                Intent(this, FloatingWidgetService::class.java).apply {
-                    putExtra("mode", 0)
-                    startService(this)
-                }
-            }
-        }
-    }
-    private fun showWidgetSu() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
-            //val intent: Intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${packageName}"))
-            //startActivityForResult(intent, 1)
-            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
-                Uri.parse("package:${packageName}")
-            })
-        } else {
-            //fwService.showWidget()
-            if (!fwService.isStarted) {
-                //startService(Intent(this, FloatingWidgetService::class.java))
-                Intent(this, FloatingWidgetService::class.java).also {
-                    it.putExtra("mode", 1)
-                    startService(it)
-                }
-                //FloatingWidgetService.Mode.MODE_DEBUG
-            }
-        }
-    }*/
-
     private fun hideWidget() {
         fwService.closeWidget()
     }
-
-    private fun showNotification() {
-        notificationManager.notify(1, FloatingWidgetNotification.build(this))
-    }
-
-    private fun showColourPickerFn() {
-        startActivity(Intent(this, ColourPickerActivity::class.java))
-    }
-
 
 }
 

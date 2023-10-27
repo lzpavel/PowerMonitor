@@ -1,9 +1,5 @@
 package com.lzpavel.powermonitor
 
-import android.content.Context
-import android.widget.Toast
-import androidx.compose.ui.graphics.Color
-import androidx.core.content.contentValuesOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,17 +13,37 @@ class MainViewModel() : ViewModel() {
 //    private val _cnt: MutableLiveData<Int> = MutableLiveData(0)
 //    val cnt: LiveData<Int> = _cnt
 
+    var floatingWidgetStyle: FloatingWidgetStyle = FloatingWidgetStyle.getInstance()
+
     val cnt: MutableLiveData<Int> = MutableLiveData(0)
     val mainActivityExecute: MutableLiveData<Int> = MutableLiveData(0)
     private val _isFloatingWidgetShowing: MutableLiveData<Boolean> = MutableLiveData(false)
     val isFloatingWidgetShowing: LiveData<Boolean> = _isFloatingWidgetShowing
-    private val _floatingWidgetColor: MutableLiveData<Int> = MutableLiveData(0x000000FF)
-    val floatingWidgetColor: LiveData<Int> = _floatingWidgetColor
+//    private val _floatingWidgetColor: MutableLiveData<Int> = MutableLiveData(0x000000FF)
+//    val floatingWidgetColor: LiveData<Int> = _floatingWidgetColor
+    private val _floatingWidgetStyleLive: MutableLiveData<FloatingWidgetStyle> = MutableLiveData(floatingWidgetStyle)
+    val floatingWidgetStyleLive: LiveData<FloatingWidgetStyle> = _floatingWidgetStyleLive
+    private val _floatingWidgetColorLive: MutableLiveData<Int> = MutableLiveData(floatingWidgetStyle.textColor)
+    val floatingWidgetColorLive: LiveData<Int> = _floatingWidgetColorLive
 
 
-    fun updateFloatingWidgetColor(colorArgb: Int) {
-        _floatingWidgetColor.value = colorArgb
+
+
+    /*fun updateFloatingWidgetStyle(floatingWidgetStyle: FloatingWidgetStyle) {
+        _floatingWidgetStyleLive.value  = floatingWidgetStyle
+    }*/
+    fun updateFloatingWidgetStyle() {
+        _floatingWidgetStyleLive.value = floatingWidgetStyle
     }
+
+    fun setTextColorFloatingWidget(color: Int) {
+        floatingWidgetStyle.textColor = color
+        _floatingWidgetColorLive.value = color
+        updateFloatingWidgetStyle()
+    }
+
+
+
 
     fun updateFloatingWidgetShowing(isShowing: Boolean) {
         _isFloatingWidgetShowing.value = isShowing

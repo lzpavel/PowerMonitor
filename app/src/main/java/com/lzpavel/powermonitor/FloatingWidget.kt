@@ -28,6 +28,9 @@ class FloatingWidget(context: Context) {
         PixelFormat.TRANSLUCENT
     )
 
+    //private var textColor: Int = Color.BLACK
+    private val floatingWidgetStyle: FloatingWidgetStyle = FloatingWidgetStyle.getInstance()
+
     private var preX = 0F
     private var preY = 0F
     private var nowX = 0F
@@ -78,6 +81,9 @@ class FloatingWidget(context: Context) {
             return@setOnTouchListener false
         }
     }
+    init {
+        updateTextStyle()
+    }
 
     fun setTextValue(text: String) {
         textView.text = text
@@ -89,9 +95,18 @@ class FloatingWidget(context: Context) {
         }
     }
 
-    fun setTextColor(colorArgb: Int) {
-        textView.setTextColor(colorArgb)
+    fun updateTextStyle() {
+        textView.setTextColor(floatingWidgetStyle.textColor)
     }
+
+    fun setTextColor(color: Int) {
+        //textColor = color
+        //textView.setTextColor(color)
+        textView.setTextColor(floatingWidgetStyle.textColor)
+    }
+    /*fun getTextColor() : Int {
+        return textColor
+    }*/
 
     fun show() {
         windowManager.addView(mainView, layoutParams)

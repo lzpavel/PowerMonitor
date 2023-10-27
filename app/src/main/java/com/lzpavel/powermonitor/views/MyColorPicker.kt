@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -34,15 +35,21 @@ fun MyColorPicker(
     var color = remember { mutableStateOf(Color.Blue) }
 //var color: Color = Color(256)
     Column {
+        var rColor: Color? = null
+        val vmColor = vm?.floatingWidgetStyle?.textColor
+        if (vmColor != null) {
+            rColor = Color(vmColor)
+        }
         HsvColorPicker(modifier = Modifier
             .fillMaxWidth()
             .height(450.dp)
             .padding(10.dp),
             controller = controller,
+            initialColor = rColor,
             onColorChanged = { colorEnvelope: ColorEnvelope ->
                 val mColor: Color = colorEnvelope.color
                 color.value = mColor
-                vm?.updateFloatingWidgetColor(mColor.toArgb())
+                vm?.setTextColorFloatingWidget(mColor.toArgb())
                 val hexCode: String = colorEnvelope.hexCode
                 val fromUser: Boolean = colorEnvelope.fromUser
                 //Log.d(LOG_TAG, "$mColor $hexCode $fromUser")
