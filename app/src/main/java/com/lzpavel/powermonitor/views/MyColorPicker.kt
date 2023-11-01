@@ -36,9 +36,11 @@ fun MyColorPicker(
 //var color: Color = Color(256)
     Column {
         var rColor: Color? = null
-        val vmColor = vm?.floatingWidgetStyle?.textColor
+        val vmColor = vm?.floatingWidgetStyle?.textColorPre
+        //val vmColor = vm?.textColorFloatingWidgetLive?.observeAsState()?.value
         if (vmColor != null) {
             rColor = Color(vmColor)
+            //rColor = Color(0x77777777)
         }
         HsvColorPicker(modifier = Modifier
             .fillMaxWidth()
@@ -49,7 +51,8 @@ fun MyColorPicker(
             onColorChanged = { colorEnvelope: ColorEnvelope ->
                 val mColor: Color = colorEnvelope.color
                 color.value = mColor
-                vm?.setTextColorFloatingWidget(mColor.toArgb())
+                //vm?.setTextColorFloatingWidget(mColor.toArgb())
+                vm?.floatingWidgetStyle?.textColor = mColor.toArgb()
                 val hexCode: String = colorEnvelope.hexCode
                 val fromUser: Boolean = colorEnvelope.fromUser
                 //Log.d(LOG_TAG, "$mColor $hexCode $fromUser")
@@ -59,7 +62,7 @@ fun MyColorPicker(
                 .fillMaxWidth()
                 .padding(10.dp)
                 .height(35.dp),
-            controller = controller,
+            controller = controller
         )
         BrightnessSlider(
             modifier = Modifier
@@ -67,6 +70,7 @@ fun MyColorPicker(
                 .padding(10.dp)
                 .height(35.dp),
             controller = controller,
+            initialColor = rColor
         )
 
         //MyBox()

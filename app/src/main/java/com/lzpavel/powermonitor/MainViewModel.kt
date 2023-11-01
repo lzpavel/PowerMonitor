@@ -21,18 +21,26 @@ class MainViewModel() : ViewModel() {
     val isFloatingWidgetShowing: LiveData<Boolean> = _isFloatingWidgetShowing
 //    private val _floatingWidgetColor: MutableLiveData<Int> = MutableLiveData(0x000000FF)
 //    val floatingWidgetColor: LiveData<Int> = _floatingWidgetColor
-    private val _floatingWidgetStyleLive: MutableLiveData<FloatingWidgetStyle> = MutableLiveData(floatingWidgetStyle)
-    val floatingWidgetStyleLive: LiveData<FloatingWidgetStyle> = _floatingWidgetStyleLive
-    private val _floatingWidgetColorLive: MutableLiveData<Int> = MutableLiveData(floatingWidgetStyle.textColor)
-    val floatingWidgetColorLive: LiveData<Int> = _floatingWidgetColorLive
+    //private val _floatingWidgetStyleLive: MutableLiveData<FloatingWidgetStyle> = MutableLiveData(floatingWidgetStyle)
+    //val floatingWidgetStyleLive: LiveData<FloatingWidgetStyle> = _floatingWidgetStyleLive
+    //private val _floatingWidgetColorLive: MutableLiveData<Int> = MutableLiveData(floatingWidgetStyle.textColor)
+    //val floatingWidgetColorLive: LiveData<Int> = _floatingWidgetColorLive
 
 
 
+    private val _textColorFloatingWidgetLive: MutableLiveData<Int> = MutableLiveData(floatingWidgetStyle.textColor)
+    val textColorFloatingWidgetLive: LiveData<Int> = _textColorFloatingWidgetLive
+    private val onUpdateFloatingWidgetStyle: () -> Unit = {
+        _textColorFloatingWidgetLive.value = floatingWidgetStyle.textColor
+    }
+    init {
+        floatingWidgetStyle.addListener(onUpdateFloatingWidgetStyle)
+    }
 
     /*fun updateFloatingWidgetStyle(floatingWidgetStyle: FloatingWidgetStyle) {
         _floatingWidgetStyleLive.value  = floatingWidgetStyle
     }*/
-    fun updateFloatingWidgetStyle() {
+    /*fun updateFloatingWidgetStyle() {
         _floatingWidgetStyleLive.value = floatingWidgetStyle
     }
 
@@ -40,7 +48,7 @@ class MainViewModel() : ViewModel() {
         floatingWidgetStyle.textColor = color
         _floatingWidgetColorLive.value = color
         updateFloatingWidgetStyle()
-    }
+    }*/
 
 
 
@@ -52,5 +60,6 @@ class MainViewModel() : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
+        floatingWidgetStyle.removeListener(onUpdateFloatingWidgetStyle)
     }
 }

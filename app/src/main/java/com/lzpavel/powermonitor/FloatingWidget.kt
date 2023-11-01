@@ -30,6 +30,9 @@ class FloatingWidget(context: Context) {
 
     //private var textColor: Int = Color.BLACK
     private val floatingWidgetStyle: FloatingWidgetStyle = FloatingWidgetStyle.getInstance()
+    private val onUpdateFloatingWidgetStyle: () -> Unit = {
+        textView.setTextColor(floatingWidgetStyle.textColor)
+    }
 
     private var preX = 0F
     private var preY = 0F
@@ -80,10 +83,12 @@ class FloatingWidget(context: Context) {
 
             return@setOnTouchListener false
         }
+        floatingWidgetStyle.addListener(onUpdateFloatingWidgetStyle)
+        textView.setTextColor(floatingWidgetStyle.textColor)
     }
-    init {
+    /*init {
         updateTextStyle()
-    }
+    }*/
 
     fun setTextValue(text: String) {
         textView.text = text
@@ -95,15 +100,15 @@ class FloatingWidget(context: Context) {
         }
     }
 
-    fun updateTextStyle() {
+    /*fun updateTextStyle() {
         textView.setTextColor(floatingWidgetStyle.textColor)
-    }
+    }*/
 
-    fun setTextColor(color: Int) {
+    /*fun setTextColor(color: Int) {
         //textColor = color
         //textView.setTextColor(color)
         textView.setTextColor(floatingWidgetStyle.textColor)
-    }
+    }*/
     /*fun getTextColor() : Int {
         return textColor
     }*/
@@ -114,6 +119,7 @@ class FloatingWidget(context: Context) {
     }
 
     fun close() {
+        floatingWidgetStyle.removeListener(onUpdateFloatingWidgetStyle)
         windowManager.removeView(mainView)
     }
 

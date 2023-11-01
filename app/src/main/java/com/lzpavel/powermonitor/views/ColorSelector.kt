@@ -45,7 +45,7 @@ fun ColorSelector(
             modifier = Modifier.clickable { onClick?.invoke() }
         )
         var rColor: Color = Color.Blue
-        val vmColor = vm?.floatingWidgetColorLive?.observeAsState()?.value
+        val vmColor = vm?.textColorFloatingWidgetLive?.observeAsState()?.value
         if (vmColor != null) {
             rColor = Color(vmColor)
         }

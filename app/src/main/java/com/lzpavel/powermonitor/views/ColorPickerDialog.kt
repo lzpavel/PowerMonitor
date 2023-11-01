@@ -48,10 +48,14 @@ fun ColorPickerDialog(
                         .fillMaxWidth()
 
                 ) {
-                    TextButton(onClick = { onDismiss?.invoke() }) {
+                    TextButton(onClick = {
+                        onDismiss?.invoke()
+                    }) {
                         Text(text = "Cancel")
                     }
-                    TextButton(onClick = { onConfirm?.invoke() }) {
+                    TextButton(onClick = {
+                        onConfirm?.invoke()
+                    }) {
                         Text(text = "OK")
                     }
                 }

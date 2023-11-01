@@ -70,11 +70,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Log.d(LOG_TAG, "onCreate")
 
-        viewModel.floatingWidgetStyleLive.observe(this, Observer {
+        /*viewModel.floatingWidgetStyleLive.observe(this, Observer {
             if (isFwConnected) {
                 fwService.floatingWidget?.updateTextStyle()
             }
-        })
+        })*/
 
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

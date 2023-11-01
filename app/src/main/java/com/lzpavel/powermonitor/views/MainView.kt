@@ -38,7 +38,7 @@ fun MainView(
 
                 var openColorDialog by remember { mutableStateOf(false) }
                 //var currentColor by remember { mutableStateOf(Color.Blue) }
-                var colorStyle = vm?.floatingWidgetStyleLive?.observeAsState()?.value
+                //var colorStyle = vm?.floatingWidgetStyleLive?.observeAsState()?.value
 
                 var isFwShowing = vm?.isFloatingWidgetShowing?.observeAsState()?.value ?: false
                 FloatingWidgetSwitcher(
@@ -59,10 +59,17 @@ fun MainView(
                 if (openColorDialog) {
                     ColorPickerDialog(
                         vm,
-                        onDismiss = { openColorDialog = false },
-                        onConfirm = {
+                        onDismiss = {
+                            vm?.floatingWidgetStyle?.let {
+                                it.textColor = it.textColorPre
+                            }
                             openColorDialog = false
-
+                                    },
+                        onConfirm = {
+                            vm?.floatingWidgetStyle?.let {
+                                it.textColorPre = it.textColor
+                            }
+                            openColorDialog = false
                         }
                     )
                 }
