@@ -12,11 +12,18 @@ class FloatingWidgetStyle private constructor() {
             field = value
             notifyUpdate()
         }
-    var textColorPre: Int = Color.RED
+
+    var textColorPre: Int = Color.BLACK
+
+    var textSize: Float = 14f
+        set(value) {
+            field = value
+            notifyUpdate()
+        }
 
     private fun notifyUpdate() {
-        for (u in onUpdate) {
-            u.invoke()
+        for (l in onUpdate) {
+            l.invoke()
         }
     }
 

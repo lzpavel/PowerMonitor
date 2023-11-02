@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PixelFormat
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -32,6 +33,8 @@ class FloatingWidget(context: Context) {
     private val floatingWidgetStyle: FloatingWidgetStyle = FloatingWidgetStyle.getInstance()
     private val onUpdateFloatingWidgetStyle: () -> Unit = {
         textView.setTextColor(floatingWidgetStyle.textColor)
+        //textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, floatingWidgetStyle.textSize)
+        textView.textSize = floatingWidgetStyle.textSize
     }
 
     private var preX = 0F
@@ -83,8 +86,8 @@ class FloatingWidget(context: Context) {
 
             return@setOnTouchListener false
         }
+        onUpdateFloatingWidgetStyle.invoke()
         floatingWidgetStyle.addListener(onUpdateFloatingWidgetStyle)
-        textView.setTextColor(floatingWidgetStyle.textColor)
     }
     /*init {
         updateTextStyle()

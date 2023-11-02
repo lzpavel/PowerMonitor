@@ -50,6 +50,8 @@ fun MainView(
                     openColorDialog = true
                 }
                 Divider()
+                SizeSelector(vm)
+                Divider()
                 Button(onClick = { vm?.cnt?.postValue(++cnt) }) {
                     Text(text = "$cnt")
                 }
