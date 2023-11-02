@@ -29,16 +29,16 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels { MainViewModelFactory() }
 
-    private lateinit var fwService: FloatingWidgetService
-    private var isFwConnected: Boolean = false
+    //private lateinit var fwService: FloatingWidgetService
+    //private var isFwConnected: Boolean = false
 
     private lateinit var notificationManager: NotificationManager
 
-    companion object {
+    /*companion object {
         const val RECEIVER_ACTION = "com.lzpavel.powermonitor.MAIN_ACTIVITY_RECEIVER"
-    }
+    }*/
 
-    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    /*private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(LOG_TAG, "BroadcastReceiver: onReceive")
             val type: String = intent?.getStringExtra("type") ?: ""
@@ -49,9 +49,9 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-    }
+    }*/
 
-    private val fwConnection = object : ServiceConnection {
+    /*private val fwConnection = object : ServiceConnection {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance.
@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
         override fun onServiceDisconnected(arg0: ComponentName) {
             isFwConnected = false
         }
-    }
+    }*/
 
     @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,10 +88,10 @@ class MainActivity : ComponentActivity() {
                     exitProcess(0)
                 },
                 onClickFloatingWidgetSwitcher = {
-                    if (!fwService.isShowing) {
-                        showWidget()
+                    if (!FloatingWidgetService.isStarted) {
+                        startFloatingWidgetService()
                     } else {
-                        hideWidget()
+                        FloatingWidgetService.stop()
                     }
                 }
             )
@@ -100,20 +100,20 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        subscribeReceiver()
+        /*subscribeReceiver()
         Intent(this, FloatingWidgetService::class.java).also {intent ->
             bindService(intent, fwConnection, Context.BIND_AUTO_CREATE)
-        }
+        }*/
     }
 
     override fun onStop() {
         super.onStop()
-        unbindService(fwConnection)
-        unsubscribeReceiver()
-        isFwConnected = false
+        //unbindService(fwConnection)
+        //unsubscribeReceiver()
+        //isFwConnected = false
     }
 
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    /*@SuppressLint("UnspecifiedRegisterReceiverFlag")
     fun subscribeReceiver() {
         //val br: BroadcastReceiver = MyBroadcastReceiver()
 
@@ -125,13 +125,13 @@ class MainActivity : ComponentActivity() {
             //registerReceiver(br, filter, 0)
             registerReceiver(broadcastReceiver, filter)
         }
-    }
+    }*/
 
-    fun unsubscribeReceiver() {
+    /*fun unsubscribeReceiver() {
         unregisterReceiver(broadcastReceiver)
-    }
+    }*/
 
-    private fun showWidget() {
+    private fun startFloatingWidgetService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
             //val intent: Intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${packageName}"))
             //startActivityForResult(intent, 1)
@@ -139,20 +139,19 @@ class MainActivity : ComponentActivity() {
                 Uri.parse("package:${packageName}")
             })
         } else {
+            startService(Intent(this, FloatingWidgetService::class.java))
             //fwService.showWidget()
-            if (!fwService.isStarted) {
-                startService(Intent(this, FloatingWidgetService::class.java))
                 /*Intent(this, FloatingWidgetService::class.java).apply {
                     putExtra("mode", 0)
                     startService(this)
                 }*/
-            }
+
         }
     }
 
-    private fun hideWidget() {
-        fwService.closeWidget()
-    }
+    /*private fun stopFloatingWidgetService() {
+        FloatingWidgetService.
+    }*/
 
 }
 

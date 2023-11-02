@@ -40,10 +40,10 @@ fun MainView(
                 //var currentColor by remember { mutableStateOf(Color.Blue) }
                 //var colorStyle = vm?.floatingWidgetStyleLive?.observeAsState()?.value
 
-                var isFwShowing = vm?.isFloatingWidgetShowing?.observeAsState()?.value ?: false
+                //var isFwShowing = vm?.isFloatingWidgetShowing?.observeAsState()?.value ?: false
                 FloatingWidgetSwitcher(
-                    isFwShowing,
-                    onClick = onClickFloatingWidgetSwitcher
+                    vm = vm,
+                    onClickFloatingWidgetSwitcher = onClickFloatingWidgetSwitcher
                 )
                 Divider()
                 ColorSelector(vm) {

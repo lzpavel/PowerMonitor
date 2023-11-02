@@ -13,14 +13,21 @@ class MainViewModel() : ViewModel() {
 //    private val _cnt: MutableLiveData<Int> = MutableLiveData(0)
 //    val cnt: LiveData<Int> = _cnt
 
+
+
     var floatingWidgetStyle: FloatingWidgetStyle = FloatingWidgetStyle.getInstance()
 
     val cnt: MutableLiveData<Int> = MutableLiveData(0)
     val mainActivityExecute: MutableLiveData<Int> = MutableLiveData(0)
-    private val _isFloatingWidgetShowing: MutableLiveData<Boolean> = MutableLiveData(false)
-    val isFloatingWidgetShowing: LiveData<Boolean> = _isFloatingWidgetShowing
+    //private val _isFloatingWidgetShowing: MutableLiveData<Boolean> = MutableLiveData(false)
+    //val isFloatingWidgetShowing: LiveData<Boolean> = _isFloatingWidgetShowing
 
 
+    private val _isServiceStarted: MutableLiveData<Boolean> = MutableLiveData(FloatingWidgetService.isStarted)
+    val isServiceStarted: LiveData<Boolean> = _isServiceStarted
+    private val onUpdateServiceStarted = {
+        _isServiceStarted.value = FloatingWidgetService.isStarted
+    }
 
     private val _textColorFloatingWidgetLive: MutableLiveData<Int> = MutableLiveData(floatingWidgetStyle.textColor)
     val textColorFloatingWidgetLive: LiveData<Int> = _textColorFloatingWidgetLive
@@ -34,6 +41,7 @@ class MainViewModel() : ViewModel() {
 
 
     init {
+        FloatingWidgetService.onChangeStarted = onUpdateServiceStarted
         floatingWidgetStyle.addListener(onUpdateFloatingWidgetStyle)
     }
 
@@ -42,13 +50,14 @@ class MainViewModel() : ViewModel() {
 
 
 
-    fun updateFloatingWidgetShowing(isShowing: Boolean) {
+    /*fun updateFloatingWidgetShowing(isShowing: Boolean) {
         _isFloatingWidgetShowing.value = isShowing
-    }
+    }*/
 
 
     override fun onCleared() {
         super.onCleared()
+        FloatingWidgetService.onChangeStarted = null
         floatingWidgetStyle.removeListener(onUpdateFloatingWidgetStyle)
     }
 }
