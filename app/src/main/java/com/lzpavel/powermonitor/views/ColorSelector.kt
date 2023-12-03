@@ -18,51 +18,48 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColor
 import com.lzpavel.powermonitor.FloatingWidgetStyle
 import com.lzpavel.powermonitor.MainViewModel
 
 @Preview(showBackground = true)
 @Composable
 fun ColorSelector(
-    vm: MainViewModel? = null,
-    onClick: (() -> Unit)? = null
+    color: Int? = null,
+    onClick: () -> Unit = {}
 ) {
-//fun ColorSelector(color: Color = Color.Blue, onClick: (() -> Unit)? = null) {
+    val mColor = if (color == null) {
+        Color.Blue
+    } else {
+        Color(color)
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .clickable { onClick?.invoke() },
+            .clickable { onClick() },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "Select color",
             fontSize = 16.sp,
-            modifier = Modifier.clickable { onClick?.invoke() }
+            modifier = Modifier.clickable { onClick() }
         )
-        var rColor: Color = Color.Blue
-        val vmColor = vm?.textColorFloatingWidgetLive?.observeAsState()?.value
-        if (vmColor != null) {
-            rColor = Color(vmColor)
-        }
         Box(
             modifier = Modifier
                 .height(24.dp)
                 .width(24.dp)
                 .background(
-                    color = rColor,
+                    color = mColor,
                     shape = RectangleShape
                 )
-                .clickable { onClick?.invoke() }
+                .clickable { onClick() }
         )
-        /*Switch(
-            checked = isChecked,
-            onCheckedChange = null,
-            modifier = Modifier.clickable { onClick?.invoke() }
-        )*/
     }
 }

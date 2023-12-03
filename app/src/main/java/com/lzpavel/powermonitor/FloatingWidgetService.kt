@@ -15,16 +15,11 @@ class FloatingWidgetService : Service() {
 
     val LOG_TAG = "FloatingWidgetService"
 
-    //private val binder = FloatingWidgetBinder()
-
-
-
     var floatingWidget: FloatingWidget? = null
 
     var superUserSession: SuperUserSession? = null
 
-
-    //var isStarted = false
+    var isStarted = false
     var isShowing = false
     var cnt: Int = 0
 
@@ -32,38 +27,10 @@ class FloatingWidgetService : Service() {
     val FW_MODE_SUPERUSER = 1
     var fwMode = FW_MODE_DEBUG
 
-
-    companion object {
-        private var instance: FloatingWidgetService? = null
-        var onChangeStarted: (() -> Unit)? = null
-        var isStarted = false
-            private set(value) {
-                field = value
-                onChangeStarted?.invoke()
-            }
-
-        fun stop() {
-            if (isStarted) {
-                instance?.stopServicePrivate()
-            }
-        }
-
-        /*fun getInstance() : FloatingWidgetService {
-            if (instance == null) {
-                instance = FloatingWidgetService()
-            }
-            return instance!!
-        }*/
-    }
-
-    /*inner class FloatingWidgetBinder : Binder() {
-        fun getService(): FloatingWidgetService = this@FloatingWidgetService
-    }*/
-
     override fun onCreate() {
         super.onCreate()
         Log.d(LOG_TAG, "onCreate")
-        instance = this
+        ComponentController.floatingWidgetService = this
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -80,12 +47,21 @@ class FloatingWidgetService : Service() {
             }
             e.printStackTrace()
         }
-        floatingWidget = FloatingWidget(this)
+        floatingWidget = if (ComponentController.mainViewModel != null) {
+            FloatingWidget(
+                this,
+                ComponentController.mainViewModel!!.textColorFloatingWidget,
+                ComponentController.mainViewModel!!.textSizeFloatingWidget
+            )
+        } else {
+            FloatingWidget(this)
+        }
         floatingWidget?.show()
         isShowing = true
-        //sendBroadcast()
         tick()
-
+        if (ComponentController.mainViewModel != null) {
+            ComponentController.mainViewModel!!.isStartedFloatingWidgetService = true
+        }
         return START_NOT_STICKY
     }
 
@@ -107,7 +83,8 @@ class FloatingWidgetService : Service() {
 
     override fun onDestroy() {
         Log.d(LOG_TAG, "onDestroy")
-        instance = null
+        ComponentController.floatingWidgetService = null
+        //instance = null
         super.onDestroy()
     }
 
@@ -140,16 +117,7 @@ class FloatingWidgetService : Service() {
 
     }
 
-    /*fun sendBroadcast() {
-        Intent().also { intent ->
-            intent.setAction(MainActivity.RECEIVER_ACTION)
-            intent.putExtra("type", "update")
-            intent.putExtra("isShowing", isShowing)
-            sendBroadcast(intent)
-        }
-    }*/
-
-    private fun stopServicePrivate() {
+    fun stopService() {
         if (superUserSession != null) {
             superUserSession?.close()
             superUserSession = null
@@ -160,13 +128,14 @@ class FloatingWidgetService : Service() {
             isShowing = false
             //sendBroadcast()
         }
+        if (ComponentController.mainViewModel != null) {
+            ComponentController.mainViewModel!!.isStartedFloatingWidgetService = false
+        }
         if (isStarted) {
             isStarted = false
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
         }
     }
-
-
 
 }

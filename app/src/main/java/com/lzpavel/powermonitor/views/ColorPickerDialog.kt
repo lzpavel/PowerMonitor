@@ -16,20 +16,42 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.lzpavel.powermonitor.ComponentController
 import com.lzpavel.powermonitor.MainViewModel
 
 @Preview(showBackground = true)
 @Composable
 fun ColorPickerDialog(
-    vm: MainViewModel? = null,
-    onDismiss: (() -> Unit)? = null,
-    onConfirm: (() -> Unit)? = null
+    //vm: MainViewModel? = null,
+    //onDismiss: (() -> Unit)? = null,
+    //onConfirm: (() -> Unit)? = null
+    onConfirmDismiss: () -> Unit = {}
 ) {
-    Dialog(onDismissRequest = { onDismiss?.invoke() }) {
+    val onConfirm: () -> Unit = {
+        ComponentController.floatingWidgetService?.floatingWidget?.let {
+            it.preTextColor = it.textColor
+        }
+        ComponentController.mainViewModel?.let {
+            it.textColorPreFloatingWidget = it.textColorFloatingWidget
+        }
+        onConfirmDismiss()
+    }
+    val onDismiss: () -> Unit = {
+        ComponentController.floatingWidgetService?.floatingWidget?.let {
+            it.textColor = it.preTextColor
+            ComponentController.mainViewModel?.textColorFloatingWidget = it.preTextColor
+        }
+        ComponentController.mainViewModel?.let {
+            it.textColorFloatingWidget = it.textColorPreFloatingWidget
+        }
+        onConfirmDismiss()
+    }
+    Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
                 .fillMaxSize()
@@ -41,32 +63,21 @@ fun ColorPickerDialog(
                         modifier = Modifier
                         .fillMaxHeight()
             ) {
-                MyColorPicker(vm)
+                MyColorPicker()
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
                         .fillMaxWidth()
 
                 ) {
-                    TextButton(onClick = {
-                        onDismiss?.invoke()
-                    }) {
+                    TextButton(onClick = onDismiss) {
                         Text(text = "Cancel")
                     }
-                    TextButton(onClick = {
-                        onConfirm?.invoke()
-                    }) {
+                    TextButton(onClick = onConfirm) {
                         Text(text = "OK")
                     }
                 }
             }
-            /*Text(
-                text = "This is a minimal dialog",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentSize(Alignment.Center),
-                textAlign = TextAlign.Center,
-            )*/
         }
     }
 }

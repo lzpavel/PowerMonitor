@@ -16,6 +16,8 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.lzpavel.powermonitor.MainViewModel
 
 
@@ -24,7 +26,8 @@ import com.lzpavel.powermonitor.MainViewModel
 fun MainView(
     vm: MainViewModel? = null,
     onButtonExit: (() -> Unit)? = null,
-    onClickFloatingWidgetSwitcher: (() -> Unit)? = null,
+    onButtonSave: (() -> Unit)? = null,
+    onClickFloatingWidgetSwitcher: (() -> Unit)? = null
 ) {
 
     PowerMonitorTheme {
@@ -34,9 +37,13 @@ fun MainView(
             color = MaterialTheme.colorScheme.background
         ) {
             Column {
-                var cnt = vm?.cnt?.observeAsState()?.value ?: 0
+                var isOpenColorDialog by remember { mutableStateOf(false) }
+                var isOpenDeviceDialog by remember { mutableStateOf(false) }
 
-                var openColorDialog by remember { mutableStateOf(false) }
+                var textSizeFloatingWidget =
+                    vm?.textSizeFloatingWidgetLive?.observeAsState()?.value ?: 16F
+                var textColorFloatingWidget =
+                    vm?.textColorFloatingWidgetLive?.observeAsState()?.value ?: Color.Blue.toArgb()
                 //var currentColor by remember { mutableStateOf(Color.Blue) }
                 //var colorStyle = vm?.floatingWidgetStyleLive?.observeAsState()?.value
 
@@ -46,34 +53,31 @@ fun MainView(
                     onClickFloatingWidgetSwitcher = onClickFloatingWidgetSwitcher
                 )
                 Divider()
-                ColorSelector(vm) {
-                    openColorDialog = true
+                ColorSelector(textColorFloatingWidget) {
+                    isOpenColorDialog = true
                 }
                 Divider()
-                SizeSelector(vm)
+                SizeSelector(textSizeFloatingWidget)
                 Divider()
-                Button(onClick = { vm?.cnt?.postValue(++cnt) }) {
-                    Text(text = "$cnt")
+                DeviceSelector() {
+                    isOpenDeviceDialog = true
+                }
+                Divider()
+                Button(onClick = { onButtonSave?.invoke() }) {
+                    Text(text = "Save config")
                 }
                 Button(onClick = { onButtonExit?.invoke() }) {
                     Text(text = "Exit")
                 }
-                if (openColorDialog) {
-                    ColorPickerDialog(
-                        vm,
-                        onDismiss = {
-                            vm?.floatingWidgetStyle?.let {
-                                it.textColor = it.textColorPre
-                            }
-                            openColorDialog = false
-                                    },
-                        onConfirm = {
-                            vm?.floatingWidgetStyle?.let {
-                                it.textColorPre = it.textColor
-                            }
-                            openColorDialog = false
-                        }
-                    )
+                if (isOpenColorDialog) {
+                    ColorPickerDialog {
+                        isOpenColorDialog = false
+                    }
+                }
+                if (isOpenDeviceDialog) {
+                    DeviceDialog() {
+                        isOpenDeviceDialog = false
+                    }
                 }
 
 

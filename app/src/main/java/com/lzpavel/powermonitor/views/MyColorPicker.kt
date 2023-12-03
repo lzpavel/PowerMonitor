@@ -17,44 +17,41 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColor
 import com.github.skydoves.colorpicker.compose.AlphaSlider
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import com.lzpavel.powermonitor.ComponentController
 import com.lzpavel.powermonitor.MainViewModel
 
 @Preview(showBackground = true)
 @Composable
-fun MyColorPicker(
-    vm: MainViewModel? = null,
-    onColorChanged: (() -> Unit)? = null
-) {
+fun MyColorPicker() {
 
     val controller = rememberColorPickerController()
-    var color = remember { mutableStateOf(Color.Blue) }
-//var color: Color = Color(256)
+
+    var initialColor: Color? = null
+    ComponentController.mainViewModel?.textColorFloatingWidget?.let {
+        initialColor = Color(it)
+    }
+
     Column {
-        var rColor: Color? = null
-        val vmColor = vm?.floatingWidgetStyle?.textColorPre
-        //val vmColor = vm?.textColorFloatingWidgetLive?.observeAsState()?.value
-        if (vmColor != null) {
-            rColor = Color(vmColor)
-            //rColor = Color(0x77777777)
-        }
         HsvColorPicker(modifier = Modifier
             .fillMaxWidth()
             .height(450.dp)
             .padding(10.dp),
             controller = controller,
-            initialColor = rColor,
+            initialColor = initialColor,
             onColorChanged = { colorEnvelope: ColorEnvelope ->
-                val mColor: Color = colorEnvelope.color
-                color.value = mColor
-                //vm?.setTextColorFloatingWidget(mColor.toArgb())
-                vm?.floatingWidgetStyle?.textColor = mColor.toArgb()
-                val hexCode: String = colorEnvelope.hexCode
-                val fromUser: Boolean = colorEnvelope.fromUser
+                val newColor = colorEnvelope.color
+                ComponentController.mainViewModel?.textColorFloatingWidget = newColor.toArgb()
+                ComponentController.floatingWidgetService?.floatingWidget?.textColor = newColor.toArgb()
+
+                //val color: Color = colorEnvelope.color
+                //val hexCode: String = colorEnvelope.hexCode
+                //val fromUser: Boolean = colorEnvelope.fromUser
                 //Log.d(LOG_TAG, "$mColor $hexCode $fromUser")
             })
         AlphaSlider(
@@ -70,17 +67,18 @@ fun MyColorPicker(
                 .padding(10.dp)
                 .height(35.dp),
             controller = controller,
-            initialColor = rColor
+            initialColor = initialColor
         )
 
-        //MyBox()
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp)
                 .height(35.dp)
                 .background(
-                    color = color.value,
+                    //color = Color(initialColor) ?: Color.Blue,
+                    color = controller.selectedColor.value,
+                    //color = mInitialColor,
                     shape = RoundedCornerShape(16.dp)
                 )
         )

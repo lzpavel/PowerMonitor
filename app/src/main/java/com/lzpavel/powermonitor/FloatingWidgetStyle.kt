@@ -5,19 +5,20 @@ import android.widget.TextView
 
 class FloatingWidgetStyle private constructor() {
 
-    val onUpdate = mutableListOf<() -> Unit>()
+    /*val onUpdate = mutableListOf<() -> Unit>()
+    var textColorPre: Int = Color.BLACK
 
     var textColor: Int = Color.BLACK
         set(value) {
             field = value
+            //isChanged = true
             notifyUpdate()
         }
-
-    var textColorPre: Int = Color.BLACK
 
     var textSize: Float = 14f
         set(value) {
             field = value
+            //isChanged = true
             notifyUpdate()
         }
 
@@ -37,6 +38,7 @@ class FloatingWidgetStyle private constructor() {
 
     companion object {
         private var instance: FloatingWidgetStyle? = null
+        //var isChanged = false
 
         fun getInstance() : FloatingWidgetStyle {
             if (instance == null) {
@@ -44,7 +46,7 @@ class FloatingWidgetStyle private constructor() {
             }
             return instance!!
         }
-    }
+    }*/
 
 
 

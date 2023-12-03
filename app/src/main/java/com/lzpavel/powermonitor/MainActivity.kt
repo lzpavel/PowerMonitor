@@ -18,8 +18,20 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import com.lzpavel.powermonitor.storage.SettingsPreferences
+import com.lzpavel.powermonitor.storage.dataStore
 import com.lzpavel.powermonitor.views.MainView
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlin.system.exitProcess
 
 
@@ -76,6 +88,9 @@ class MainActivity : ComponentActivity() {
             }
         })*/
 
+        //val dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
+
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         FloatingWidgetNotification.createNotificationChannel(notificationManager)
@@ -87,15 +102,43 @@ class MainActivity : ComponentActivity() {
                     finishAffinity()
                     exitProcess(0)
                 },
+                onButtonSave = {
+                    /*lifecycleScope.launch {
+                        saveSettings()
+                    }*/
+                },
                 onClickFloatingWidgetSwitcher = {
-                    if (!FloatingWidgetService.isStarted) {
-                        startFloatingWidgetService()
-                    } else {
-                        FloatingWidgetService.stop()
-                    }
+//                    if (!FloatingWidgetService.isStarted) {
+//                        startFloatingWidgetService()
+//                    } else {
+//                        FloatingWidgetService.stop()
+//                    }
                 }
             )
         }
+
+        /*lifecycleScope.launch {
+            dataStore.data.collect {prefs ->
+                val color: Int? = prefs[SettingsPreferences.FIELD_COLOR]
+                val size: Float? = prefs[SettingsPreferences.FIELD_SIZE]
+                if (color != null || size != null) {
+                    val fvs = FloatingWidgetStyle.getInstance()
+                    if (color != null) {
+                        fvs.textColor = color
+                    }
+                    if (size != null) {
+                        fvs.textSize = size
+                    }
+                }
+
+
+            }
+        }*/
+
+        ComponentController.mainActivity = this
+        /*viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+        }*/
     }
 
     override fun onStart() {
@@ -108,10 +151,42 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
+        /*if (FloatingWidgetStyle.isChanged) {
+            lifecycleScope.launch {
+                saveSettings()
+            }
+        }*/
+
         //unbindService(fwConnection)
         //unsubscribeReceiver()
         //isFwConnected = false
     }
+
+    override fun onDestroy() {
+        ComponentController.mainActivity = null
+        super.onDestroy()
+    }
+
+    fun switchService() {
+        if (ComponentController.floatingWidgetService == null) {
+            startFloatingWidgetService()
+        } else {
+            ComponentController.floatingWidgetService!!.stopService()
+        }
+        /*if (!FloatingWidgetService.isStarted) {
+            startFloatingWidgetService()
+        } else {
+            FloatingWidgetService.stop()
+        }*/
+    }
+
+    /*private suspend fun saveSettings() {
+        val fvs = FloatingWidgetStyle.getInstance()
+        dataStore.edit { prefs ->
+            prefs[SettingsPreferences.FIELD_COLOR] = fvs.textColor
+            prefs[SettingsPreferences.FIELD_SIZE] = fvs.textSize
+        }
+    }*/
 
     /*@SuppressLint("UnspecifiedRegisterReceiverFlag")
     fun subscribeReceiver() {

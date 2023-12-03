@@ -13,7 +13,22 @@ import android.view.WindowManager
 import android.widget.TextView
 
 @SuppressLint("ClickableViewAccessibility")
-class FloatingWidget(context: Context) {
+class FloatingWidget(
+    context: Context,
+    textColor: Int = Color.BLACK,
+    textSize: Float = 16F
+) {
+    var preTextColor: Int = Color.BLACK
+    var textColor: Int = textColor
+        set(value) {
+            field = value
+            textView.setTextColor(value)
+        }
+    var textSize: Float = textSize
+        set(value) {
+            field = value
+            textView.textSize = value
+        }
 
     private val mainView: View = LayoutInflater.from(context).inflate(R.layout.floating_widget, null)
     private var textView: TextView = mainView.findViewById(R.id.textViewFw)
@@ -30,12 +45,12 @@ class FloatingWidget(context: Context) {
     )
 
     //private var textColor: Int = Color.BLACK
-    private val floatingWidgetStyle: FloatingWidgetStyle = FloatingWidgetStyle.getInstance()
+    /*private val floatingWidgetStyle: FloatingWidgetStyle = FloatingWidgetStyle.getInstance()
     private val onUpdateFloatingWidgetStyle: () -> Unit = {
         textView.setTextColor(floatingWidgetStyle.textColor)
         //textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, floatingWidgetStyle.textSize)
         textView.textSize = floatingWidgetStyle.textSize
-    }
+    }*/
 
     private var preX = 0F
     private var preY = 0F
@@ -86,12 +101,10 @@ class FloatingWidget(context: Context) {
 
             return@setOnTouchListener false
         }
-        onUpdateFloatingWidgetStyle.invoke()
-        floatingWidgetStyle.addListener(onUpdateFloatingWidgetStyle)
+
+        textView.setTextColor(textColor)
+        textView.textSize = textSize
     }
-    /*init {
-        updateTextStyle()
-    }*/
 
     fun setTextValue(text: String) {
         textView.text = text
@@ -103,26 +116,13 @@ class FloatingWidget(context: Context) {
         }
     }
 
-    /*fun updateTextStyle() {
-        textView.setTextColor(floatingWidgetStyle.textColor)
-    }*/
-
-    /*fun setTextColor(color: Int) {
-        //textColor = color
-        //textView.setTextColor(color)
-        textView.setTextColor(floatingWidgetStyle.textColor)
-    }*/
-    /*fun getTextColor() : Int {
-        return textColor
-    }*/
-
     fun show() {
         windowManager.addView(mainView, layoutParams)
         mainView.visibility = View.VISIBLE
     }
 
     fun close() {
-        floatingWidgetStyle.removeListener(onUpdateFloatingWidgetStyle)
+        //floatingWidgetStyle.removeListener(onUpdateFloatingWidgetStyle)
         windowManager.removeView(mainView)
     }
 

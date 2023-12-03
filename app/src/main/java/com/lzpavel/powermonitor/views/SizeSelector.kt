@@ -18,31 +18,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
+import com.lzpavel.powermonitor.ComponentController
 
 @Preview(showBackground = true)
 @Composable
-fun SizeSelector(vm: MainViewModel? = null) {
+fun SizeSelector(size: Float = 16F) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        //val size by remember { mutableStateOf(0.5f) }
-        //var size by remember { mutableFloatStateOf(5f) }
-        var rSize = 16f
-        val vmSize = vm?.textSizeFloatingWidgetLive?.observeAsState()?.value
-        if (vmSize != null) {
-            rSize = vmSize
-        }
         Text(
-            text = "Text size: $rSize",
+            text = "Text size: $size",
             fontSize = 16.sp
         )
         Slider(
-            value = rSize,
+            value = size,
             onValueChange = {v ->
-                vm?.floatingWidgetStyle?.textSize = v
-                            },
+                ComponentController.floatingWidgetService?.floatingWidget?.textSize = v
+                ComponentController.mainViewModel?.textSizeFloatingWidget = v
+            },
             steps = 0,
             valueRange = 5f..100f
         )

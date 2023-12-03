@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lzpavel.powermonitor.ComponentController
 import com.lzpavel.powermonitor.MainViewModel
 
 @Preview(showBackground = true)
@@ -30,7 +31,7 @@ fun FloatingWidgetSwitcher(
         verticalAlignment = Alignment.CenterVertically
     ) {
         var rChecked = false
-        val vmChecked = vm?.isServiceStarted?.observeAsState()?.value
+        val vmChecked = vm?.isStartedFloatingWidgetServiceLive?.observeAsState()?.value
         if (vmChecked != null) {
             rChecked = vmChecked
         }
@@ -41,7 +42,10 @@ fun FloatingWidgetSwitcher(
         Switch(
             checked = rChecked,
             onCheckedChange = null,
-            modifier = Modifier.clickable { onClickFloatingWidgetSwitcher?.invoke() }
+            modifier = Modifier.clickable {
+                ComponentController.mainActivity?.switchService()
+                //onClickFloatingWidgetSwitcher?.invoke()
+            }
         )
     }
 }
