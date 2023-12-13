@@ -47,6 +47,14 @@ class MainViewModel(
     private val _textSizeFloatingWidgetLive: MutableLiveData<Float> = MutableLiveData(textSizeFloatingWidget)
     val textSizeFloatingWidgetLive: LiveData<Float> = _textSizeFloatingWidgetLive
 
+    var deviceType: Int = Device.DEBUG
+        set(value) {
+            field = value
+            _deviceTypeLive.value = value
+        }
+    private val _deviceTypeLive: MutableLiveData<Int> = MutableLiveData(deviceType)
+    val deviceTypeLive: LiveData<Int> = _deviceTypeLive
+
 
     //var floatingWidgetStyle: FloatingWidgetStyle = FloatingWidgetStyle.getInstance()
 

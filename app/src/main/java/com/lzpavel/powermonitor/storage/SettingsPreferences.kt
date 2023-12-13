@@ -6,4 +6,5 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 object SettingsPreferences {
     val FIELD_COLOR = intPreferencesKey("color")
     val FIELD_SIZE = floatPreferencesKey("size")
+    val FIELD_DEVICE = intPreferencesKey("device")
 }

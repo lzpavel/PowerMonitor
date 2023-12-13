@@ -1,6 +1,7 @@
 package com.lzpavel.powermonitor
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -24,17 +25,19 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import java.time.format.TextStyle
+
 
 object HomeWidget: GlanceAppWidget() {
 
-    //val countKey = intPreferencesKey("count")
-
     @Composable
-    fun Content() {
-        //val count = currentState(key = countKey) ?: 0
-        Column (
+    fun Content(
+        voltage: String? = null,
+        current: String? = null,
+        capacity: String? = null,
+    ) {
+        Column(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(Color.DarkGray)
@@ -42,28 +45,35 @@ object HomeWidget: GlanceAppWidget() {
             verticalAlignment = Alignment.Vertical.CenterVertically,
             horizontalAlignment = Alignment.Horizontal.CenterHorizontally
         ) {
-            Text(text = "V:")
-            Text(text = "A:")
-            Text(text = "C:")
-
-            /*Text (
-                text = count.toString(),
-                style = androidx.glance.text.TextStyle(
-                    fontWeight = FontWeight.Medium,
+            Text(
+                text = "V:${voltage ?: "-"}\n" +
+                        "A:${current ?: "-"}\n" +
+                        "C:${capacity ?: "-"}",
+                modifier = GlanceModifier.clickable(
+                    onClick = actionRunCallback(QueryActionCallback::class.java)
+                ),
+                style = TextStyle(
                     color = ColorProvider(Color.White),
-                    fontSize = 26.sp
+                    fontSize = 16.sp
                 )
             )
-            Button(
-                text = "Inc",
-                onClick = actionRunCallback(IncrementActionCallback::class.java)
-            )*/
+
         }
     }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        var v: String? = null
+        var a: String? = null
+        var c: String? = null
+        val su = SuperUserSimple()
+        if (su.isOpened){
+            v = su.readVoltage()
+            a = su.readCurrent()
+            c = su.readCapacity()
+            su.close()
+        }
         provideContent {
-            Content()
+            Content(v, a, c)
         }
     }
 
@@ -74,21 +84,12 @@ class HomeWidgetReceiver() : GlanceAppWidgetReceiver() {
         get() = HomeWidget
 }
 
-object QueryActionCallback: ActionCallback {
+object QueryActionCallback : ActionCallback {
     override suspend fun onAction(
         context: Context,
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        Toast.makeText(context, "Widget clicked", Toast.LENGTH_SHORT).show()
-        /*updateAppWidgetState(context, glanceId) { prefs ->
-            val currentCount = prefs[CounterWidget.countKey]
-            if (currentCount != null) {
-                prefs[CounterWidget.countKey] = currentCount + 1
-            } else {
-                prefs[CounterWidget.countKey] = 1
-            }
-            CounterWidget.update(context, glanceId)
-        }*/
+        HomeWidget.update(context, glanceId)
     }
 }

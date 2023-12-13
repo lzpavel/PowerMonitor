@@ -18,17 +18,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.lzpavel.powermonitor.ComponentController
 import com.lzpavel.powermonitor.MainViewModel
 
 
 @Preview(showBackground = true)
 @Composable
-fun MainView(
-    vm: MainViewModel? = null,
-    onButtonExit: (() -> Unit)? = null,
-    onButtonSave: (() -> Unit)? = null,
-    onClickFloatingWidgetSwitcher: (() -> Unit)? = null
-) {
+fun MainView(vm: MainViewModel? = null) {
 
     PowerMonitorTheme {
         // A surface container using the 'background' color from the theme
@@ -44,14 +40,13 @@ fun MainView(
                     vm?.textSizeFloatingWidgetLive?.observeAsState()?.value ?: 16F
                 var textColorFloatingWidget =
                     vm?.textColorFloatingWidgetLive?.observeAsState()?.value ?: Color.Blue.toArgb()
+                var deviceType =
+                    vm?.deviceTypeLive?.observeAsState()?.value ?: 0
                 //var currentColor by remember { mutableStateOf(Color.Blue) }
                 //var colorStyle = vm?.floatingWidgetStyleLive?.observeAsState()?.value
 
                 //var isFwShowing = vm?.isFloatingWidgetShowing?.observeAsState()?.value ?: false
-                FloatingWidgetSwitcher(
-                    vm = vm,
-                    onClickFloatingWidgetSwitcher = onClickFloatingWidgetSwitcher
-                )
+                FloatingWidgetSwitcher(vm)
                 Divider()
                 ColorSelector(textColorFloatingWidget) {
                     isOpenColorDialog = true
@@ -59,14 +54,17 @@ fun MainView(
                 Divider()
                 SizeSelector(textSizeFloatingWidget)
                 Divider()
-                DeviceSelector() {
+                DeviceSelector(deviceType) {
                     isOpenDeviceDialog = true
                 }
                 Divider()
-                Button(onClick = { onButtonSave?.invoke() }) {
+                Button(onClick = { ComponentController.mainActivity?.saveSettings() }) {
                     Text(text = "Save config")
                 }
-                Button(onClick = { onButtonExit?.invoke() }) {
+                Button(onClick = { ComponentController.mainActivity?.testSu() }) {
+                    Text(text = "Test Su")
+                }
+                Button(onClick = { ComponentController.mainActivity?.exitApp() }) {
                     Text(text = "Exit")
                 }
                 if (isOpenColorDialog) {

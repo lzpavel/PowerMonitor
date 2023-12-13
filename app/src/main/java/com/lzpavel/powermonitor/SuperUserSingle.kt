@@ -16,34 +16,45 @@ class SuperUserSingle private constructor(){
     companion object {
         private const val LOG_TAG = "SuperUserSingle"
         private var instance: SuperUserSingle? = null
-        var isOpened = false
-        var countConnections = 0
+        const val STATE_ERROR = -1
+        const val STATE_CLOSED = 0
+        const val STATE_OPENED = 1
+        var state: Int = STATE_CLOSED
+        //var isOpened = false
+        //var countConnections = 0
 
-        private fun open() {
-            if (instance == null) {
+        fun open() {
+            if (instance == null && state == STATE_CLOSED) {
                 try {
                     instance = SuperUserSingle()
                     instance!!.openSu()
-                    isOpened = true
+                    state = STATE_OPENED
                 } catch (e: Exception) {
                     e.printStackTrace()
                     Log.d(LOG_TAG, "Error open super user session")
-                    isOpened = false
+                    state = STATE_ERROR
                     instance = null
                 }
 
             }
         }
 
-        private fun close() {
-            if (instance != null) {
+        fun close() {
+            if (instance != null && state == STATE_OPENED) {
                 instance!!.closeSu()
                 instance = null
-                isOpened = false
+                state = STATE_CLOSED
             }
         }
 
-        fun connectAndGet() : SuperUserSingle? {
+        fun readVoltage() : String {
+            if (instance != null && state == STATE_OPENED) {
+                return instance!!.readVoltageSu()
+            }
+            return ""
+        }
+
+        /*fun connectAndGet() : SuperUserSingle? {
             if (countConnections >= 0) {
                 if (countConnections == 0) {
                     open()
@@ -60,7 +71,18 @@ class SuperUserSingle private constructor(){
                 }
                 countConnections--
             }
-        }
+        }*/
+    }
+
+    private fun readVoltageSu() : String {
+        val path = """/sys/class/power_supply/battery/voltage_now"""
+        writer.write("cat $path\n")
+        writer.flush()
+        /*while (!reader.ready()) {
+            Thread.sleep(100)
+        }*/
+        val result = reader.readLine() ?: ""
+        return result
     }
 
     private fun execute(cmd: String) {
@@ -78,6 +100,6 @@ class SuperUserSingle private constructor(){
     private fun closeSu() {
         writer.write("exit\n")
         writer.flush()
-        process.waitFor();
+        process.waitFor()
     }
 }

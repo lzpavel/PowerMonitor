@@ -29,6 +29,7 @@ import androidx.lifecycle.lifecycleScope
 import com.lzpavel.powermonitor.storage.SettingsPreferences
 import com.lzpavel.powermonitor.storage.dataStore
 import com.lzpavel.powermonitor.views.MainView
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -96,44 +97,23 @@ class MainActivity : ComponentActivity() {
         FloatingWidgetNotification.createNotificationChannel(notificationManager)
 
         setContent {
-            MainView(
-                viewModel,
-                onButtonExit = {
-                    finishAffinity()
-                    exitProcess(0)
-                },
-                onButtonSave = {
-                    /*lifecycleScope.launch {
-                        saveSettings()
-                    }*/
-                },
-                onClickFloatingWidgetSwitcher = {
-//                    if (!FloatingWidgetService.isStarted) {
-//                        startFloatingWidgetService()
-//                    } else {
-//                        FloatingWidgetService.stop()
-//                    }
-                }
-            )
+            MainView(viewModel)
         }
 
-        /*lifecycleScope.launch {
+        lifecycleScope.launch {
             dataStore.data.collect {prefs ->
-                val color: Int? = prefs[SettingsPreferences.FIELD_COLOR]
-                val size: Float? = prefs[SettingsPreferences.FIELD_SIZE]
-                if (color != null || size != null) {
-                    val fvs = FloatingWidgetStyle.getInstance()
-                    if (color != null) {
-                        fvs.textColor = color
-                    }
-                    if (size != null) {
-                        fvs.textSize = size
-                    }
+                //val color: Int? = prefs[SettingsPreferences.FIELD_COLOR]
+                prefs[SettingsPreferences.FIELD_COLOR]?.let {
+                    ComponentController.mainViewModel?.textColorFloatingWidget = it
                 }
-
-
+                prefs[SettingsPreferences.FIELD_SIZE]?.let {
+                    ComponentController.mainViewModel?.textSizeFloatingWidget = it
+                }
+                prefs[SettingsPreferences.FIELD_DEVICE]?.let {
+                    ComponentController.mainViewModel?.deviceType = it
+                }
             }
-        }*/
+        }
 
         ComponentController.mainActivity = this
         /*viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -167,6 +147,28 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
     }
 
+    fun exitApp() {
+        finishAffinity()
+        exitProcess(0)
+    }
+
+    fun testSu() {
+        val su = SuperUserSimple()
+        if (su.isOpened){
+            Log.d(LOG_TAG, "V:${su.readVoltage()}")
+            Log.d(LOG_TAG, "A:${su.readCurrent()}")
+            su.close()
+        }
+        /*if (SuperUserSingle.state == SuperUserSingle.STATE_CLOSED) {
+            SuperUserSingle.open()
+        }
+        if (SuperUserSingle.state == SuperUserSingle.STATE_OPENED) {
+            val result = SuperUserSingle.readVoltage()
+            Log.d(LOG_TAG, result)
+            SuperUserSingle.close()
+        }*/
+    }
+
     fun switchService() {
         if (ComponentController.floatingWidgetService == null) {
             startFloatingWidgetService()
@@ -178,6 +180,24 @@ class MainActivity : ComponentActivity() {
         } else {
             FloatingWidgetService.stop()
         }*/
+    }
+
+    fun saveSettings() {
+        runBlocking {
+            dataStore.edit { prefs ->
+                ComponentController.mainViewModel?.textColorFloatingWidget?.let {
+                    prefs[SettingsPreferences.FIELD_COLOR] = it
+                }
+                ComponentController.mainViewModel?.textSizeFloatingWidget?.let {
+                    prefs[SettingsPreferences.FIELD_SIZE] = it
+                }
+                ComponentController.mainViewModel?.deviceType?.let {
+                    prefs[SettingsPreferences.FIELD_DEVICE] = it
+                }
+
+            }
+        }
+
     }
 
     /*private suspend fun saveSettings() {

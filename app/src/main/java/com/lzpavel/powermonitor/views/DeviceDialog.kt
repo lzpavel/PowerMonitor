@@ -22,6 +22,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.lzpavel.powermonitor.ComponentController
+import com.lzpavel.powermonitor.Device
 
 @Preview(showBackground = true)
 @Composable
@@ -46,7 +48,10 @@ fun DeviceDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 16.dp)
-                        .clickable { onConfirmDismiss() },
+                        .clickable {
+                            ComponentController.mainViewModel?.deviceType = Device.DEBUG
+                            onConfirmDismiss()
+                                   },
                     fontSize = 24.sp,
                     textAlign = TextAlign.Center
                 )
@@ -56,7 +61,10 @@ fun DeviceDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 16.dp)
-                        .clickable { onConfirmDismiss() },
+                        .clickable {
+                            ComponentController.mainViewModel?.deviceType = Device.ONE_PLUS_7_PRO_LINEAGE
+                            onConfirmDismiss()
+                                   },
                     fontSize = 24.sp,
                     textAlign = TextAlign.Center
                 )

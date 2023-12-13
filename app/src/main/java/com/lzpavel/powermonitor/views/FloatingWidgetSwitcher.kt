@@ -19,10 +19,7 @@ import com.lzpavel.powermonitor.MainViewModel
 
 @Preview(showBackground = true)
 @Composable
-fun FloatingWidgetSwitcher(
-    vm: MainViewModel? = null,
-    onClickFloatingWidgetSwitcher: (() -> Unit)? = null
-    ) {
+fun FloatingWidgetSwitcher(vm: MainViewModel? = null) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -44,7 +41,6 @@ fun FloatingWidgetSwitcher(
             onCheckedChange = null,
             modifier = Modifier.clickable {
                 ComponentController.mainActivity?.switchService()
-                //onClickFloatingWidgetSwitcher?.invoke()
             }
         )
     }

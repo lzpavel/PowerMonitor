@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.sp
 @Preview(showBackground = true)
 @Composable
 fun DeviceSelector(
+    deviceType: Int = 0,
     onClick: () -> Unit = {}
 ) {
     Column(
@@ -21,8 +22,12 @@ fun DeviceSelector(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
+        val deviceTypeString: String = when (deviceType) {
+            1 -> "OnePlus7ProLineage"
+            else -> "Debug"
+        }
         Text(
-            text = "Device: device",
+            text = "Device: $deviceTypeString",
             modifier = Modifier.clickable { onClick() },
             fontSize = 16.sp
         )
