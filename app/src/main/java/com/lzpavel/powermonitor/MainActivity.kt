@@ -26,6 +26,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import com.lzpavel.powermonitor.device.Device
 import com.lzpavel.powermonitor.storage.SettingsPreferences
 import com.lzpavel.powermonitor.storage.dataStore
 import com.lzpavel.powermonitor.views.MainView
@@ -42,104 +43,44 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels { MainViewModelFactory() }
 
-    //private lateinit var fwService: FloatingWidgetService
-    //private var isFwConnected: Boolean = false
-
     private lateinit var notificationManager: NotificationManager
-
-    /*companion object {
-        const val RECEIVER_ACTION = "com.lzpavel.powermonitor.MAIN_ACTIVITY_RECEIVER"
-    }*/
-
-    /*private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d(LOG_TAG, "BroadcastReceiver: onReceive")
-            val type: String = intent?.getStringExtra("type") ?: ""
-            if (type == "update") {
-                val state: Boolean = intent?.getBooleanExtra("isShowing", false) ?: false
-                viewModel.updateFloatingWidgetShowing(state)
-                Log.d(LOG_TAG, "BroadcastReceiver: onReceive: isShowing: $state")
-            }
-        }
-
-    }*/
-
-    /*private val fwConnection = object : ServiceConnection {
-
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance.
-            val binder = service as FloatingWidgetService.FloatingWidgetBinder
-            fwService = binder.getService()
-            isFwConnected = true
-        }
-
-        override fun onServiceDisconnected(arg0: ComponentName) {
-            isFwConnected = false
-        }
-    }*/
 
     @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(LOG_TAG, "onCreate")
 
-        /*viewModel.floatingWidgetStyleLive.observe(this, Observer {
-            if (isFwConnected) {
-                fwService.floatingWidget?.updateTextStyle()
-            }
-        })*/
-
-        //val dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
-
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         FloatingWidgetNotification.createNotificationChannel(notificationManager)
+
+        lifecycleScope.launch {
+            dataStore.data.collect {prefs ->
+                prefs[SettingsPreferences.FIELD_COLOR]?.let {
+                    FloatingWidgetStyle.textColor = it
+                }
+                prefs[SettingsPreferences.FIELD_SIZE]?.let {
+                    FloatingWidgetStyle.textSize = it
+                }
+                prefs[SettingsPreferences.FIELD_DEVICE]?.let {
+                    Device.current = it
+                }
+            }
+        }
 
         setContent {
             MainView(viewModel)
         }
 
-        lifecycleScope.launch {
-            dataStore.data.collect {prefs ->
-                //val color: Int? = prefs[SettingsPreferences.FIELD_COLOR]
-                prefs[SettingsPreferences.FIELD_COLOR]?.let {
-                    ComponentController.mainViewModel?.textColorFloatingWidget = it
-                }
-                prefs[SettingsPreferences.FIELD_SIZE]?.let {
-                    ComponentController.mainViewModel?.textSizeFloatingWidget = it
-                }
-                prefs[SettingsPreferences.FIELD_DEVICE]?.let {
-                    ComponentController.mainViewModel?.deviceType = it
-                }
-            }
-        }
-
         ComponentController.mainActivity = this
-        /*viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-        }*/
     }
 
     override fun onStart() {
         super.onStart()
-        /*subscribeReceiver()
-        Intent(this, FloatingWidgetService::class.java).also {intent ->
-            bindService(intent, fwConnection, Context.BIND_AUTO_CREATE)
-        }*/
     }
 
     override fun onStop() {
         super.onStop()
-        /*if (FloatingWidgetStyle.isChanged) {
-            lifecycleScope.launch {
-                saveSettings()
-            }
-        }*/
-
-        //unbindService(fwConnection)
-        //unsubscribeReceiver()
-        //isFwConnected = false
     }
 
     override fun onDestroy() {
@@ -159,14 +100,6 @@ class MainActivity : ComponentActivity() {
             Log.d(LOG_TAG, "A:${su.readCurrent()}")
             su.close()
         }
-        /*if (SuperUserSingle.state == SuperUserSingle.STATE_CLOSED) {
-            SuperUserSingle.open()
-        }
-        if (SuperUserSingle.state == SuperUserSingle.STATE_OPENED) {
-            val result = SuperUserSingle.readVoltage()
-            Log.d(LOG_TAG, result)
-            SuperUserSingle.close()
-        }*/
     }
 
     fun switchService() {
@@ -175,56 +108,18 @@ class MainActivity : ComponentActivity() {
         } else {
             ComponentController.floatingWidgetService!!.stopService()
         }
-        /*if (!FloatingWidgetService.isStarted) {
-            startFloatingWidgetService()
-        } else {
-            FloatingWidgetService.stop()
-        }*/
     }
 
     fun saveSettings() {
         runBlocking {
             dataStore.edit { prefs ->
-                ComponentController.mainViewModel?.textColorFloatingWidget?.let {
-                    prefs[SettingsPreferences.FIELD_COLOR] = it
-                }
-                ComponentController.mainViewModel?.textSizeFloatingWidget?.let {
-                    prefs[SettingsPreferences.FIELD_SIZE] = it
-                }
-                ComponentController.mainViewModel?.deviceType?.let {
-                    prefs[SettingsPreferences.FIELD_DEVICE] = it
-                }
-
+                prefs[SettingsPreferences.FIELD_COLOR] = FloatingWidgetStyle.textColor
+                prefs[SettingsPreferences.FIELD_SIZE] = FloatingWidgetStyle.textSize
+                prefs[SettingsPreferences.FIELD_DEVICE] = Device.current
             }
         }
 
     }
-
-    /*private suspend fun saveSettings() {
-        val fvs = FloatingWidgetStyle.getInstance()
-        dataStore.edit { prefs ->
-            prefs[SettingsPreferences.FIELD_COLOR] = fvs.textColor
-            prefs[SettingsPreferences.FIELD_SIZE] = fvs.textSize
-        }
-    }*/
-
-    /*@SuppressLint("UnspecifiedRegisterReceiverFlag")
-    fun subscribeReceiver() {
-        //val br: BroadcastReceiver = MyBroadcastReceiver()
-
-        val filter = IntentFilter(RECEIVER_ACTION)
-        if (Build.VERSION.SDK_INT >= 33) {
-            val receiverFlags = RECEIVER_NOT_EXPORTED
-            registerReceiver(broadcastReceiver, filter, receiverFlags)
-        } else {
-            //registerReceiver(br, filter, 0)
-            registerReceiver(broadcastReceiver, filter)
-        }
-    }*/
-
-    /*fun unsubscribeReceiver() {
-        unregisterReceiver(broadcastReceiver)
-    }*/
 
     private fun startFloatingWidgetService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
@@ -244,9 +139,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /*private fun stopFloatingWidgetService() {
-        FloatingWidgetService.
-    }*/
 
 }
 

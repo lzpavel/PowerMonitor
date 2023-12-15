@@ -66,7 +66,7 @@ object HomeWidget: GlanceAppWidget() {
         var a: String? = null
         var c: String? = null
         val su = SuperUserSimple()
-        if (su.isOpened){
+        if (su.open()){
             v = su.readVoltage()
             a = su.readCurrent()
             c = su.readCapacity()

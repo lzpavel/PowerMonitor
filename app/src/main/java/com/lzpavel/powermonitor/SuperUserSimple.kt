@@ -17,7 +17,7 @@ class SuperUserSimple {
 
     var isOpened = false
 
-    init {
+    fun open() : Boolean {
         try {
             process = Runtime.getRuntime().exec("su")
             reader = BufferedReader(InputStreamReader(process.inputStream))
@@ -29,28 +29,38 @@ class SuperUserSimple {
             Log.d(LOG_TAG, "Error open super user session")
             isOpened = false
         }
+        return isOpened
     }
 
     fun readVoltage() : String {
-        val path = """/sys/class/power_supply/battery/voltage_now"""
-        writer.write("cat $path\n")
-        writer.flush()
-        val result = reader.readLine() ?: ""
+        var result = "-"
+        if (isOpened) {
+            val path = """/sys/class/power_supply/battery/voltage_now"""
+            writer.write("cat $path\n")
+            writer.flush()
+            result = reader.readLine()
+        }
         return result
     }
     fun readCurrent() : String {
-        val path = """/sys/class/power_supply/battery/current_now"""
-        writer.write("cat $path\n")
-        writer.flush()
-        val result = reader.readLine() ?: ""
+        var result = "-"
+        if (isOpened) {
+            val path = """/sys/class/power_supply/battery/current_now"""
+            writer.write("cat $path\n")
+            writer.flush()
+            result = reader.readLine()
+        }
         return result
     }
 
     fun readCapacity() : String {
-        val path = """/sys/class/power_supply/battery/charge_counter"""
-        writer.write("cat $path\n")
-        writer.flush()
-        val result = reader.readLine() ?: ""
+        var result = "-"
+        if (isOpened) {
+            val path = """/sys/class/power_supply/battery/charge_counter"""
+            writer.write("cat $path\n")
+            writer.flush()
+            result = reader.readLine()
+        }
         return result
     }
 

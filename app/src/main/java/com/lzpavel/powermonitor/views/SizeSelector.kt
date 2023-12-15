@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import com.lzpavel.powermonitor.ComponentController
+import com.lzpavel.powermonitor.FloatingWidgetStyle
 
 @Preview(showBackground = true)
 @Composable
@@ -35,8 +36,9 @@ fun SizeSelector(size: Float = 16F) {
         Slider(
             value = size,
             onValueChange = {v ->
-                ComponentController.floatingWidgetService?.floatingWidget?.textSize = v
-                ComponentController.mainViewModel?.textSizeFloatingWidget = v
+                FloatingWidgetStyle.textSize = v
+                //ComponentController.floatingWidgetService?.floatingWidget?.textSize = v
+                //ComponentController.mainViewModel?.textSizeFloatingWidget = v
             },
             steps = 0,
             valueRange = 5f..100f

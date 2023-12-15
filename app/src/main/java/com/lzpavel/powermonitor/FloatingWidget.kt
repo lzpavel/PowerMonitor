@@ -13,18 +13,17 @@ import android.view.WindowManager
 import android.widget.TextView
 
 @SuppressLint("ClickableViewAccessibility")
-class FloatingWidget(
-    context: Context,
-    textColor: Int = Color.BLACK,
-    textSize: Float = 16F
-) {
-    var preTextColor: Int = Color.BLACK
-    var textColor: Int = textColor
+class FloatingWidget(context: Context) {
+
+    var isShowing = false
+
+    var preTextColor: Int = FloatingWidgetStyle.preTextColor
+    var textColor: Int = FloatingWidgetStyle.textColor
         set(value) {
             field = value
             textView.setTextColor(value)
         }
-    var textSize: Float = textSize
+    var textSize: Float = FloatingWidgetStyle.textSize
         set(value) {
             field = value
             textView.textSize = value
@@ -117,13 +116,18 @@ class FloatingWidget(
     }
 
     fun show() {
-        windowManager.addView(mainView, layoutParams)
-        mainView.visibility = View.VISIBLE
+        if (!isShowing) {
+            windowManager.addView(mainView, layoutParams)
+            mainView.visibility = View.VISIBLE
+            isShowing = true
+        }
     }
 
     fun close() {
-        //floatingWidgetStyle.removeListener(onUpdateFloatingWidgetStyle)
-        windowManager.removeView(mainView)
+        if (isShowing) {
+            windowManager.removeView(mainView)
+            isShowing = false
+        }
     }
 
 }

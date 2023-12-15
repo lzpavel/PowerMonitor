@@ -3,51 +3,23 @@ package com.lzpavel.powermonitor
 import android.graphics.Color
 import android.widget.TextView
 
-class FloatingWidgetStyle private constructor() {
-
-    /*val onUpdate = mutableListOf<() -> Unit>()
-    var textColorPre: Int = Color.BLACK
-
+object FloatingWidgetStyle {
+    var preTextColor: Int = Color.BLACK
+        set(value) {
+            field = value
+            ComponentController.floatingWidgetService?.floatingWidget?.preTextColor = value
+            ComponentController.mainViewModel?.textColorPreFloatingWidget = value
+        }
     var textColor: Int = Color.BLACK
         set(value) {
             field = value
-            //isChanged = true
-            notifyUpdate()
+            ComponentController.floatingWidgetService?.floatingWidget?.textColor = value
+            ComponentController.mainViewModel?.textColorFloatingWidget = value
         }
-
-    var textSize: Float = 14f
+    var textSize: Float = 16F
         set(value) {
             field = value
-            //isChanged = true
-            notifyUpdate()
+            ComponentController.floatingWidgetService?.floatingWidget?.textSize = value
+            ComponentController.mainViewModel?.textSizeFloatingWidget = value
         }
-
-    private fun notifyUpdate() {
-        for (l in onUpdate) {
-            l.invoke()
-        }
-    }
-
-    fun addListener(listener: () -> Unit) {
-        onUpdate.add(listener)
-    }
-
-    fun removeListener(listener: () -> Unit) {
-        onUpdate.remove(listener)
-    }
-
-    companion object {
-        private var instance: FloatingWidgetStyle? = null
-        //var isChanged = false
-
-        fun getInstance() : FloatingWidgetStyle {
-            if (instance == null) {
-                instance = FloatingWidgetStyle()
-            }
-            return instance!!
-        }
-    }*/
-
-
-
 }

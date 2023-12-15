@@ -1,14 +1,9 @@
 package com.lzpavel.powermonitor.views
 
-import android.text.Layout
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -23,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.lzpavel.powermonitor.ComponentController
-import com.lzpavel.powermonitor.Device
+import com.lzpavel.powermonitor.device.Device
 
 @Preview(showBackground = true)
 @Composable
@@ -49,7 +44,7 @@ fun DeviceDialog(
                         .fillMaxWidth()
                         .padding(vertical = 16.dp)
                         .clickable {
-                            ComponentController.mainViewModel?.deviceType = Device.DEBUG
+                            Device.current = Device.DEBUG
                             onConfirmDismiss()
                                    },
                     fontSize = 24.sp,
@@ -62,7 +57,7 @@ fun DeviceDialog(
                         .fillMaxWidth()
                         .padding(vertical = 16.dp)
                         .clickable {
-                            ComponentController.mainViewModel?.deviceType = Device.ONE_PLUS_7_PRO_LINEAGE
+                            Device.current = Device.ONE_PLUS_7_PRO_LINEAGE
                             onConfirmDismiss()
                                    },
                     fontSize = 24.sp,

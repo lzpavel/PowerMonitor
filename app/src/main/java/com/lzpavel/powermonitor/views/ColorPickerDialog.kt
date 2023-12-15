@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.lzpavel.powermonitor.ComponentController
+import com.lzpavel.powermonitor.FloatingWidgetStyle
 import com.lzpavel.powermonitor.MainViewModel
 
 @Preview(showBackground = true)
@@ -33,21 +34,14 @@ fun ColorPickerDialog(
     onConfirmDismiss: () -> Unit = {}
 ) {
     val onConfirm: () -> Unit = {
-        ComponentController.floatingWidgetService?.floatingWidget?.let {
+        FloatingWidgetStyle.let {
             it.preTextColor = it.textColor
-        }
-        ComponentController.mainViewModel?.let {
-            it.textColorPreFloatingWidget = it.textColorFloatingWidget
         }
         onConfirmDismiss()
     }
     val onDismiss: () -> Unit = {
-        ComponentController.floatingWidgetService?.floatingWidget?.let {
+        FloatingWidgetStyle.let {
             it.textColor = it.preTextColor
-            ComponentController.mainViewModel?.textColorFloatingWidget = it.preTextColor
-        }
-        ComponentController.mainViewModel?.let {
-            it.textColorFloatingWidget = it.textColorPreFloatingWidget
         }
         onConfirmDismiss()
     }

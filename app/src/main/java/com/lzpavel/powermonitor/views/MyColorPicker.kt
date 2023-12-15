@@ -24,6 +24,7 @@ import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.lzpavel.powermonitor.ComponentController
+import com.lzpavel.powermonitor.FloatingWidgetStyle
 import com.lzpavel.powermonitor.MainViewModel
 
 @Preview(showBackground = true)
@@ -46,8 +47,10 @@ fun MyColorPicker() {
             initialColor = initialColor,
             onColorChanged = { colorEnvelope: ColorEnvelope ->
                 val newColor = colorEnvelope.color
-                ComponentController.mainViewModel?.textColorFloatingWidget = newColor.toArgb()
-                ComponentController.floatingWidgetService?.floatingWidget?.textColor = newColor.toArgb()
+                FloatingWidgetStyle.textColor = newColor.toArgb()
+
+                //ComponentController.mainViewModel?.textColorFloatingWidget = newColor.toArgb()
+                //ComponentController.floatingWidgetService?.floatingWidget?.textColor = newColor.toArgb()
 
                 //val color: Color = colorEnvelope.color
                 //val hexCode: String = colorEnvelope.hexCode

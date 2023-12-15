@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
+import com.lzpavel.powermonitor.device.Device
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -15,17 +16,13 @@ class FloatingWidgetService : Service() {
 
     val LOG_TAG = "FloatingWidgetService"
 
-    var floatingWidget: FloatingWidget? = null
-
-    var superUserSession: SuperUserSession? = null
+    val floatingWidget by lazy {
+        FloatingWidget(this)
+    }
+    var superUserSimple = SuperUserSimple()
+    var threadMonitoring = ThreadMonitoring()
 
     var isStarted = false
-    var isShowing = false
-    var cnt: Int = 0
-
-    val FW_MODE_DEBUG = 0
-    val FW_MODE_SUPERUSER = 1
-    var fwMode = FW_MODE_DEBUG
 
     override fun onCreate() {
         super.onCreate()
@@ -37,31 +34,27 @@ class FloatingWidgetService : Service() {
         Log.d(LOG_TAG, "onStartCommand")
         isStarted = true
         startForeground(1, FloatingWidgetNotification.build(this))
-        try {
-            superUserSession = SuperUserSession()
-            fwMode = FW_MODE_SUPERUSER
-        } catch (e: Exception) {
-            fwMode = FW_MODE_DEBUG
-            e.message?.let {
-                Log.d(LOG_TAG, it)
+        floatingWidget.show()
+        if (Device.current == Device.ONE_PLUS_7_PRO_LINEAGE) {
+            if (superUserSimple.open()) {
+                threadMonitoring.start {
+                    val v = superUserSimple.readVoltage()
+                    val a = superUserSimple.readCurrent()
+                    val c = superUserSimple.readCapacity()
+                    val str = "$v\n$a\n$c"
+                    floatingWidget.postTextValue(str)
+                }
+            } else {
+                Device.current = Device.DEBUG
             }
-            e.printStackTrace()
-        }
-        floatingWidget = if (ComponentController.mainViewModel != null) {
-            FloatingWidget(
-                this,
-                ComponentController.mainViewModel!!.textColorFloatingWidget,
-                ComponentController.mainViewModel!!.textSizeFloatingWidget
-            )
+
         } else {
-            FloatingWidget(this)
+            var cnt = 0
+            threadMonitoring.start {
+                floatingWidget.postTextValue("${cnt++}")
+            }
         }
-        floatingWidget?.show()
-        isShowing = true
-        tick()
-        if (ComponentController.mainViewModel != null) {
-            ComponentController.mainViewModel!!.isStartedFloatingWidgetService = true
-        }
+        ComponentController.mainViewModel?.isStartedFloatingWidgetService = true
         return START_NOT_STICKY
     }
 
@@ -88,49 +81,11 @@ class FloatingWidgetService : Service() {
         super.onDestroy()
     }
 
-    fun tick() {
-        cnt = 0
-        thread {
-            runBlocking {
-                launch {
-                    while (isStarted) {
-                        if (fwMode == FW_MODE_SUPERUSER) {
-                            val str = superUserSession?.readVoltageCurrent() ?: "null"
-                            Log.d(LOG_TAG, str)
-                            /*textViewFw.post {
-                                textViewFw.text = str
-                            }*/
-                            floatingWidget?.postTextValue(str)
-                        } else {
-                            Log.d(LOG_TAG, "${cnt++}")
-                            //textViewFw.text = cnt.toString()
-                            /*textViewFw.post {
-                                textViewFw.text = cnt.toString()
-                            }*/
-                            floatingWidget?.postTextValue(cnt.toString())
-                        }
-                        delay(1000)
-                    }
-                }
-            }
-        }
-
-    }
-
     fun stopService() {
-        if (superUserSession != null) {
-            superUserSession?.close()
-            superUserSession = null
-        }
-        if (floatingWidget != null) {
-            floatingWidget?.close()
-            floatingWidget = null
-            isShowing = false
-            //sendBroadcast()
-        }
-        if (ComponentController.mainViewModel != null) {
-            ComponentController.mainViewModel!!.isStartedFloatingWidgetService = false
-        }
+        threadMonitoring.stop()
+        superUserSimple.close()
+        floatingWidget.close()
+        ComponentController.mainViewModel?.isStartedFloatingWidgetService = false
         if (isStarted) {
             isStarted = false
             stopForeground(STOP_FOREGROUND_REMOVE)
